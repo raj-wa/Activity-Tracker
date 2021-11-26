@@ -2,7 +2,7 @@ import React , { Component} from 'react';
 import * as d3 from 'd3';
 const colors = [ '#8ce8ad', '#57e188', '#34c768', '#2db757', '#27acaa', '#42c9c2', '#60e6e1', '#93f0e6', '#87d3f2', '#4ebeeb', '#35a4e8', '#188ce5', '#542ea5', '#724bc3', '#9c82d4', '#c981b2', '#b14891', '#ff6d00', '#ff810a', '#ff9831', '#ffb46a', '#ff9a91', '#ff736a', '#f95d54', '#ff4136', '#c4c4cd' ];
 
-class DonutChart extends Component {
+class   DonutChart extends Component {
 
     constructor(props) {
         super(props);
@@ -14,6 +14,7 @@ class DonutChart extends Component {
     componentDidMount() {
         this.drawChart()
     }
+
 
 
     // DrawChart 
@@ -71,7 +72,7 @@ class DonutChart extends Component {
         .style("text-anchor", "middle")
         .style("font-weight", 100)
         .style("fill", '#222')
-        .style("font-size", 32);
+        .style("font-size", 50);
 
        //Label for value
         svg
@@ -79,9 +80,9 @@ class DonutChart extends Component {
         .append('text')
         .text((d)=>{ return  d.data.value})
         .style("fill", '#444')
-        .style("font-size", 20)
+        .style("font-size", 40)
         .style("text-anchor", "middle")
-        .attr("y", 16 );
+        .attr("y", 50 );
     }
 
 

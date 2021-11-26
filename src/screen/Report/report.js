@@ -1,65 +1,33 @@
-import React, { useEffect, useRef,useState } from "react";
-import * as d3 from 'd3'
+import React, { useEffect, useRef, useState } from "react";
 import DonutChart from './donutchart';
 import axios from "axios";
 import moment from "moment";
 import { apiKey } from "../../config";
+import './report.css'
 
-
-
-
-const donutData = [
-    {name: "<5", value: 19},
-    {name: "5-9", value: 20},
-    {name: "10-14", value: 19},
-    {name: "15-19", value: 24},
-    {name: "20-24", value: 22},
-    {name: "25-29", value: 29},
-    {name: "30-34", value: 22},
-    {name: "35-39", value: 18},
-    {name: "40-44", value: 23},
-    {name: "45-49", value: 19},
-    {name: "50-54", value: 16},
-    {name: "55-59", value: 19},
-    {name: "60-64", value: 28},
-    {name: "65-69", value: 17},
-    {name: "70-74", value: 20},
-    {name: "75-79", value: 17},
-    {name: "80-84", value: 18},
-    {name: "≥85", value: 21}
-   ]
 
 const Report = () => {
+    const [activityData, setActivityData] = useState([]);
+    const [chartData, setChartData] = useState([])
     const [currentWeek, setCurrentWeek] = useState({});
     const [currentDate, setCurrentDate] = useState();
-    const [isModalVisible, setIsModalVisible] = useState(false);
-
-    const [activityData, setActivityData] = useState([]);
-    const [activityName, setActivityName] = useState();
     const [week, setWeek] = useState(0);
+
+    const activityArray = []
 
     useEffect(() => {
         getUsetActivity();
         getCurrentWeek();
         setCurrentDate(moment().startOf('day').valueOf())
     }, [])
-
     useEffect(() => {
         getCurrentWeek()
     }, [week])
 
-    const getUsetActivity = () => {
 
-        const activityObj = {
-            "userId": localStorage.getItem("UserUID")
-        }
-
-        axios.post(apiKey + 'activity', activityObj).then((res) => {
-            setActivityData(res.data);
-        }).catch((err) => {
-            console.error("err :: ", err)
-        })
-    }
+    useEffect(() => {
+        createObjectForChart();
+    }, [activityData, currentWeek])
 
     const getCurrentWeek = () => {
         var currentDate = moment();
@@ -80,10 +48,82 @@ const Report = () => {
         setCurrentWeek(days);
     }
 
-  
+    const getUsetActivity = () => {
+
+        const activityObj = {
+            "userId": localStorage.getItem("UserUID")
+        }
+
+        axios.post(apiKey + 'activity', activityObj).then((res) => {
+            setActivityData(res.data);
+            console.log("res.data :: ", res.data)
+
+            let tmpValue = 10;
+
+            res.data.map((item) => {
+                tmpValue = tmpValue + 5
+                activityArray.push({
+                    name: item.title,
+                    value: tmpValue
+                })
+            })
+            console.log('activty arrat', activityArray);
+            setChartData(activityArray)
+        }).catch((err) => {
+            console.error("err :: ", err)
+        })
+    }
+
+    let matchedData = []
+
+    const createObjectForChart = () => {
+
+        let finalArray = []
+        let tmpObject = {}
+
+        if (activityData.length > 0) {
+            activityData.map((activityDataObj, index) => {
+
+                if (currentWeek.length > 0 && activityDataObj.activity.length > 0) {
+
+                    currentWeek.map((currentWeekObj, currentWeekIndex) => {
+                        matchedData = activityDataObj.activity.filter((activityObj, activityIndex) => activityObj.date == currentWeekObj.timeStamp.toString() && activityObj.isTrue);
+                        if (matchedData.length > 0) {
+
+                            if (finalArray.filter((finalArrayObj) => finalArrayObj.name == activityDataObj.title).length > 0) {
+                                finalArray.map((finalArrayObj) => {
+                                    if (finalArrayObj.name == activityDataObj.title) {
+                                        finalArrayObj.value = finalArrayObj.value + 1;
+                                    }
+                                })
+
+                            } else {
+                                tmpObject = {
+                                    name: activityDataObj.title,
+                                    value: 1
+                                }
+                                finalArray.push(tmpObject)
+                            }
+
+
+
+                        }
+                    })
+
+                }
+            })
+
+        }
+        setChartData(finalArray)
+        console.log("finalArray :: ", finalArray)
+    }
+
+
     return (
-        <div>
-          <DonutChart data={donutData}  />
+        <div className="dashboard-report">
+            {chartData.length > 0 &&
+                <DonutChart data={chartData} />
+            }
         </div>
     );
 };
