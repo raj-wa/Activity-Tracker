@@ -1,0 +1,89 @@
+.border{
+    border-style:inset;
+    /* border-bottom: double;
+    border-left: double;
+    border-bottom: double; */
+    padding: 5px;
+    border-color: black;
+}
+
+.withOutBorder{
+    border-style: none;
+}
+
+
+.boxSize{
+    width:150px
+}
+
+.isActivity{
+    background-color: green;
+}
+
+.isNotActivity{
+    background-color: red;
+}
+
+.ant-card-head-title{
+    white-space: pre-wrap;
+}
+.ant-card {
+    margin-bottom: 30px;
+  }
+.cus_main{
+    font-size: 0.75em;
+}
+.cus_main.border{
+    border:none;
+    border: 1px solid #80808000;
+    border-radius: 5px;
+    background: #152b40;
+    color: white;
+
+}
+.cus_mg .inn_mg{
+    padding-top:10px ;
+}
+.activity_list_section{
+    position: relative;
+    float: none;
+    display: inline-block;
+    width: 100%;
+    border: 3px solid gray;
+    padding: 15px;
+    border-radius: 5px;
+}
+.head_name{
+    position: relative;
+    text-align: center !important;
+    float: none;
+    display: inline-block;
+    width: 100%;
+}
+.head_title{
+    margin-top: 30px;
+    font-size: 2.75em;
+    text-align: center;
+    margin-bottom: 0px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.activity_list_section .ant-row {
+    display: flex;
+    flex-flow: row wrap;
+    border: 1px solid #e4dcdc;
+    padding: 5px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.check_open{
+    background: #f9dddd;
+    border-radius: 5px;
+}
+.pagination_section{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
