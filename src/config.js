@@ -1,1 +1,1 @@
-export const apiKey="http://localhost:5000/"
+export const apiKey="https://activity-tracker-testing.herokuapp.com/"

@@ -1,7 +1,7 @@
 /* eslit-disable */
 import React, { useState } from "react";
 import 'antd/dist/antd.css';
-import { Input, Button,Card } from 'antd';
+import { Input, Button, Card, message } from 'antd';
 import axios from 'axios';
 import { apiKey } from "../config";
 
@@ -12,19 +12,38 @@ const UserDetail = () => {
 
     const createUser = () => {
 
-        const userObject = {
-            "name": userName,
-            "email": userEmail
+
+
+        if (userName == undefined || userName == "") {
+            message.error("Please enter user name")
+
+            return;
         }
 
-        axios.post(apiKey + 'user/create', userObject).then((obj) => {
-            localStorage.setItem("UserUID", obj.data._id);
-            localStorage.setItem("UserName", obj.data.name)
-            localStorage.setItem("UserEmail", obj.data.email)
-            window.location.reload();
-        }).catch((err) => {
-            console.error("err :: ", err)
-        })
+        if (userEmail == undefined || userEmail == "") {
+            message.error("Please enter user Email")
+            return;
+        }
+
+
+
+        if (userEmail != "" && userName != "") {
+            const userObject = {
+                "name": userName,
+                "email": userEmail
+            }
+
+            axios.post(apiKey + 'user/create', userObject).then((obj) => {
+                localStorage.setItem("UserUID", obj.data._id);
+                localStorage.setItem("UserName", obj.data.name)
+                localStorage.setItem("UserEmail", obj.data.email)
+                window.location.reload();
+            }).catch((err) => {
+                console.error("err :: ", err)
+            })
+        }else{
+            message.error("something want wrong")
+        }
     }
 
     const onUserNameChange = (e) => {
@@ -50,7 +69,7 @@ const UserDetail = () => {
                         <Input value={localStorage.getItem("UserUID") ? localStorage.getItem("UserEmail") : userEmail} onChange={onUserEmailChange} placeholder="Email" />
                     </div>
                     <Button type="primary" onClick={createUser}>Add</Button>
-                </> : 
+                </> :
                     <Card title={localStorage.getItem("UserName")} style={{ width: 300 }}>
                         <p>{localStorage.getItem("UserEmail")}</p>
                     </Card>

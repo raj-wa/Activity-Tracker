@@ -12,10 +12,12 @@ import { CheckCircleTwoTone } from '@ant-design/icons';
 
 const ActivityDetail = () => {
 
+
+    const [userData,setUserData]=useState();
     const [currentWeek, setCurrentWeek] = useState({});
     const [currentDate, setCurrentDate] = useState();
     const [isModalVisible, setIsModalVisible] = useState(false);
-
+    
     const [activityData, setActivityData] = useState([]);
     const [activityName, setActivityName] = useState();
     const [week, setWeek] = useState(0);
@@ -24,6 +26,8 @@ const ActivityDetail = () => {
         getUsetActivity();
         getCurrentWeek();
         setCurrentDate(moment().startOf('day').valueOf())
+
+        setUserData(localStorage.getItem("UserUID"))
     }, [])
 
     useEffect(() => {
@@ -54,7 +58,7 @@ const ActivityDetail = () => {
 
         for (var i = 0; i <= 6; i++) {
             dayObj = {
-                dateOfDay: moment(weekStart).add(i, 'days').format("YYYY MMMM Do,dddd"),
+                dateOfDay: moment(weekStart).add(i, 'days').format("DD-MM-YYYY,dddd"),
                 timeStamp: moment(weekStart).add(i, 'days').valueOf()
             }
             days.push(dayObj);
@@ -68,6 +72,10 @@ const ActivityDetail = () => {
     };
 
     const handleOk = () => {
+        if (!activityName || activityName === "") {
+            message.error("Please enter activity name")
+            return;
+        }
 
         const handelSave = {
             "userId": localStorage.getItem("UserUID"),
@@ -76,7 +84,15 @@ const ActivityDetail = () => {
 
         axios.post(apiKey + 'activity/create', handelSave).then((res) => {
             if (res.data.error) {
-                message.error(res.data.error)
+                if (res.data.error == "User Not Found") {
+                    localStorage.removeItem("UserUID");
+                    localStorage.removeItem("UserName");
+                    localStorage.removeItem("UserEmail");
+                    setUserData("");
+                    message.error(res.data.error)
+                } else {
+                    message.error(res.data.error)
+                }
             }
             else {
                 const tmpObj = activityData;
@@ -102,7 +118,7 @@ const ActivityDetail = () => {
     const updateActivity = (currDate, activityId) => {
 
         if (currDate.timeStamp > currentDate) {
-            alert("You can not add that track before that day");
+            message.warning("You can not add that track before that day");
             return;
         } else {
 
@@ -149,7 +165,9 @@ const ActivityDetail = () => {
 
             <div className="pagination_section">
                 <div>
-                    <Button type="primary" style={{ background: '#152b40' }} onClick={showModal} >Add</Button>
+                    {userData &&
+                        <Button type="primary" style={{ background: '#152b40' }} onClick={showModal} >Add</Button>
+                    }
                 </div>
                 <div>
                     <Button type="primary" style={{ background: '#152b40' }} onClick={() => weekChange("decress")} >Previous</Button>
