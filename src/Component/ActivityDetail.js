@@ -5,22 +5,31 @@ import moment from "moment";
 import './ActivityDetail.css';
 import axios from "axios";
 import { apiKey } from "../config";
-import { CheckCircleTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 // import { Bar } from "react-chartjs-2";
+import { PoweroffOutlined } from '@ant-design/icons'
 
 
 
 const ActivityDetail = () => {
 
 
-    const [userData,setUserData]=useState();
+    const [focusActivity, setFocusActivity] = useState(-1);
+    const [isEditData, setIsEditData] = useState(false);
+    const [isDeleteData, setIsDeleteData] = useState(false);
+
+    const [userData, setUserData] = useState();
     const [currentWeek, setCurrentWeek] = useState({});
     const [currentDate, setCurrentDate] = useState();
     const [isModalVisible, setIsModalVisible] = useState(false);
-    
+
     const [activityData, setActivityData] = useState([]);
     const [activityName, setActivityName] = useState();
     const [week, setWeek] = useState(0);
+
+
+
+    const [activityEditData, setActivityEditData] = useState({});
 
     useEffect(() => {
         getUsetActivity();
@@ -129,7 +138,9 @@ const ActivityDetail = () => {
             const sendDataService = {
                 "activityId": activityId,
                 "activityDetailId": activityDetailId.length > 0 ? activityDetailId[0]._id : "",
-                "date": currDate.timeStamp
+                "date": currDate.timeStamp,
+                "isTitleUpdate": false,
+                "isTitleName": ""
             }
 
             axios.put(apiKey + "activity/update", sendDataService).then(res => {
@@ -155,6 +166,70 @@ const ActivityDetail = () => {
 
     }
 
+    const editbuttonShow = (activityIndex, activityObj) => {
+        console.log(activityObj.title)
+        setFocusActivity(activityObj._id);
+    }
+
+    const onEditButtonClick = (activiyData) => {
+        setActivityEditData(activiyData);
+        setActivityName(activiyData.title);
+        setIsEditData(!isEditData);
+    }
+
+    const onDeleteButtonClicl = (activiyData) => {
+        setActivityEditData(activiyData);
+        setIsDeleteData(!isEditData);
+    }
+
+    const handleEditCancel = () => {
+        setActivityName("");
+        setIsEditData(false);
+    }
+    const handleEditOk = () => {
+
+
+        if (activityName != activityEditData.title) {
+            const sendDataService = {
+                "activityId": activityEditData._id,
+                "isTitleUpdate": true,
+                "isTitleName": activityName
+            }
+
+            axios.put(apiKey + "activity/update", sendDataService).then((res) => {
+                getUsetActivity();
+                setActivityName("");
+                setIsEditData(false);
+            }).catch((err) => {
+                console.error("Err :: ", err)
+            })
+        } else {
+            message.warning("Activity Name Not change");
+        }
+
+
+    }
+    const handleDeleteOk = () => {
+
+        const sendDataService = {
+            "activityId": activityEditData._id,
+        }
+        axios.delete(apiKey + "activity/" + activityEditData._id).then((res) => {
+            getUsetActivity();
+            setActivityName("");
+            setIsEditData(false);
+        }).catch((err) => {
+            console.error("Err :: ", err)
+        })
+
+
+        setIsDeleteData(false);
+    }
+
+    const handleDeleteCancel = () => {
+        setIsDeleteData(false);
+    }
+
     return (
         <>
             <div className="head_name">
@@ -177,27 +252,36 @@ const ActivityDetail = () => {
 
             </div>
             <div className="activity_list_section" >
-                {<Row gutter={16} style={{ fontSize: '20px', fontWeight: 'bold' }} >
-                    <Col className="gutter-row" span={3}>
-                    </Col>
-                    {currentWeek.length > 0 && currentWeek.map((weekObj, index) => {
-                        return (
-                            <Col className="gutter-row" span={3}>
-                                <div className={`cus_main ${weekObj.timeStamp == currentDate ? 'border' : null}`}>
-                                    {weekObj.dateOfDay}
-                                </div>
-                            </Col>
-                        )
-                    })}
-
-                </Row>}
+                {
+                    <Row gutter={16} style={{ fontSize: '20px', fontWeight: 'bold' }} >
+                        <Col className="gutter-row" span={3}>
+                        </Col>
+                        {currentWeek.length > 0 && currentWeek.map((weekObj, index) => {
+                            return (
+                                <Col className="gutter-row" span={3}>
+                                    <div className={`cus_main ${weekObj.timeStamp == currentDate ? 'border' : null}`}>
+                                        {weekObj.dateOfDay}
+                                    </div>
+                                </Col>
+                            )
+                        })}
+                    </Row>
+                }
 
                 <div>
-                    {activityData.length > 0 && activityData.map((activityObj) => {
+                    {activityData.length > 0 && activityData.map((activityObj, activityIndex) => {
                         return (
                             <Row gutter={16}>
-                                <Col className="gutter-row cus_mg" span={3}>
+                                <Col className="gutter-row cus_mg" span={3} onMouseEnter={() => editbuttonShow(activityIndex, activityObj)} onMouseLeave={() => {
+                                    setFocusActivity(-1);
+                                }}>
                                     <div className="inn_mg">
+                                        {activityObj._id === focusActivity &&
+                                            <Button type="primary" icon={<EditOutlined style={{ height: '30px' }} />} style={{ height: '20px', width: '20px' }} onClick={() => onEditButtonClick(activityObj)} />
+                                        }
+                                        {activityObj._id === focusActivity &&
+                                            <Button danger icon={<DeleteOutlined height={20} width={20} />} style={{ height: '20px', width: '20px', marginLeft: '5px' }} onClick={() => onDeleteButtonClicl(activityObj)} />
+                                        }
                                         {activityObj.title}
                                     </div>
                                 </Col>
@@ -218,8 +302,16 @@ const ActivityDetail = () => {
                     })}
                 </div>
 
-                <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                <Modal title="Add Activity" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                     <Input value={activityName} onChange={onChangeActivityName} placeholder="Activity Name" />
+                </Modal>
+
+                <Modal title="Edit Activity" visible={isEditData} onOk={handleEditOk} onCancel={handleEditCancel}>
+                    <Input value={activityName} onChange={onChangeActivityName} placeholder="Activity Name" />
+                </Modal>
+
+                <Modal title="Delete Activity" visible={isDeleteData} onOk={handleDeleteOk} onCancel={handleDeleteCancel}>
+                    Are you sure You want to remove  <b>{activityName}</b> Activity?
                 </Modal>
             </div>
         </>

@@ -24,7 +24,8 @@ const Dashboard = () => {
     const componentsSwtich = (key) => {
         switch (key) {
           case '1':
-            return (<Report/>);
+            return (<ActivityDetail/>);
+            // return (<Report/>);
           case '2':
             return (<UserDetail/>);
           case '3':
